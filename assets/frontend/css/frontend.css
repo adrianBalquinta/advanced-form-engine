@@ -1,0 +1,49 @@
+
+.afe-form {
+    max-width: 600px;
+    margin: 1.5rem 0;
+}
+
+.afe-field {
+    margin-bottom: 1rem;
+}
+
+.afe-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.afe-required {
+    color: red;
+    margin-left: 0.25rem;
+}
+
+.afe-field input,
+.afe-field textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.afe-actions {
+    margin-top: 1rem;
+}
+
+/* Highlight the demo form on the portfolio page */
+.afe-form {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 1.5rem;
+    background: #f9fafb;
+    margin-top: 2rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.afe-form-note {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #666;
+}
