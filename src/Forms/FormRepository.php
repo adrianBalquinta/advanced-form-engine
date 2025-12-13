@@ -85,7 +85,7 @@ class FormRepository
                 return 0;
             }
 
-            $form->id        = (int) $wpdb->insert_id;
+            $form->id = (int) $wpdb->insert_id;
             $form->createdAt = $now;
             $form->updatedAt = $now;
 
@@ -96,9 +96,9 @@ class FormRepository
         $result = $wpdb->update(
             $this->table,
             [
-                'title'      => $form->title,
-                'slug'       => $form->slug,
-                'config'     => $form->configJson,
+                'title' => $form->title,
+                'slug' => $form->slug,
+                'config' => $form->configJson,
                 'updated_at' => $now,
             ],
             ['id' => $form->id],
