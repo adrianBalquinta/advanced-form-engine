@@ -6,6 +6,12 @@ namespace AFE\Core;
 use AFE\Admin\AdminMenu;
 use AFE\Frontend\Shortcode;
 use AFE\Core\Assets;
+use AFE\Core\EventDispatcher;
+use AFE\Notifications\NotificationManager;
+use AFE\Notifications\SlackWebhookNotifier;
+use AFE\Notifications\WebhookNotifier;
+use AFE\Notifications\EmailNotifier;
+use AFE\Settings\Settings;
 
 class Plugin
 {
@@ -30,6 +36,18 @@ class Plugin
         // Assets
         add_action('admin_enqueue_scripts', [$this, 'onAdminEnqueueScripts']);
         add_action('wp_enqueue_scripts', [$this, 'onFrontendEnqueueScripts']);
+
+        //Submission event
+        add_action('afe/submission_created', function (int $formId, int $submissionId, array $data) {
+
+            // Get the internal event dispatcher from the DI container
+            $events = $this->container->get(\AFE\Core\EventDispatcher::class);
+
+            // Dispatch a domain-level event for observers (notifications, etc.)
+            $events->dispatch('afe.submission.created',new \AFE\Events\SubmissionCreatedEvent($formId,$submissionId,$data));
+
+        }, 10, 3);
+
     }
 
     /**
@@ -53,6 +71,34 @@ class Plugin
         $this->container->set(Shortcode::class, function () {
             return new Shortcode();
         });
+
+        //Settings service
+        $this->container->set(Settings::class, function () {
+            return new Settings();
+        });
+
+        //Event Dispatcher
+        $this->container->set(EventDispatcher::class, function () {
+            return new EventDispatcher();
+        });
+
+        //Notification Manager
+        $this->container->set(NotificationManager::class, function () {
+            /** @var Settings $settings */
+            $settings = $this->container->get(Settings::class);
+            /**
+             * Instantiate all notification strategies.
+             *
+             * Each notifier decides internally if it is enabled
+             * (e.g. Slack only runs if a webhook URL is configured).
+             */
+            $notifiers = [
+                new SlackWebhookNotifier($settings->get('slack_webhook_url')),
+                new WebhookNotifier($settings->get('custom_webhook_url')),
+                new EmailNotifier($settings->get('notify_email')),
+            ];
+            return new NotificationManager($notifiers);
+        });
     }
 
     /**
@@ -65,6 +111,15 @@ class Plugin
 
         // Later: register REST routes, blocks, etc.
         // error_log('AFE Plugin onInit fired');
+
+        /** @var EventDispatcher $events */
+        $events = $this->container->get(EventDispatcher::class);
+
+        /** @var NotificationManager $manager */
+        $manager = $this->container->get(NotificationManager::class);
+        
+        //Register observer for form submissions.
+        $events->addListener('afe.submission.created',[$manager, 'onSubmissionCreated']);
     }
 
     /**

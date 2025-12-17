@@ -88,7 +88,7 @@ class FormListTable extends \WP_List_Table
                 esc_html__('Edit', 'advanced-form-engine')
             ),
             'duplicate' => '#', // Placeholder for now
-            'delete'    => '#', // Placeholder for now
+            'delete' => '#', // Placeholder for now
         ];
 
         return sprintf('<strong><a href="%s">%s</a></strong> %s',

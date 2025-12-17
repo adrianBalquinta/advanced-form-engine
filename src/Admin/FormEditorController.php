@@ -66,7 +66,7 @@ class FormEditorController
                 if ($savedId > 0) {
                     $redirect = add_query_arg(
                         [
-                            'page'    => 'afe_forms',
+                            'page' => 'afe_forms',
                             'updated' => 1,
                         ],
                         admin_url('admin.php')
@@ -99,10 +99,8 @@ class FormEditorController
             ? __('Edit Form', 'advanced-form-engine')
             : __('Add New Form', 'advanced-form-engine');
 
-        $listUrl = add_query_arg(
-            ['page' => 'afe_forms'],
-            admin_url('admin.php'));
-            
+        $listUrl = add_query_arg(['page' => 'afe_forms'], admin_url('admin.php'));
+
         ?>
         <div class="wrap">
             <h1 class="wp-heading-inline">

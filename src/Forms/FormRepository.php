@@ -72,9 +72,9 @@ class FormRepository
             $result = $wpdb->insert(
                 $this->table,
                 [
-                    'title'      => $form->title,
-                    'slug'       => $form->slug,
-                    'config'     => $form->configJson,
+                    'title' => $form->title,
+                    'slug' => $form->slug,
+                    'config' => $form->configJson,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ],

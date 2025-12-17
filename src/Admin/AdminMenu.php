@@ -83,11 +83,75 @@ class AdminMenu {
     }
 
     public function renderSettingsPage(): void {
+        
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have permission to access this page.', 'advanced-form-engine'));
+        }
+
+        $settings = new \AFE\Settings\Settings();
+        $saved = false;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            check_admin_referer('afe_save_settings', 'afe_settings_nonce');
+
+            $values = [
+                'slack_webhook_url'  => isset($_POST['slack_webhook_url']) ? esc_url_raw(wp_unslash((string) $_POST['slack_webhook_url'])) : '',
+                'custom_webhook_url' => isset($_POST['custom_webhook_url']) ? esc_url_raw(wp_unslash((string) $_POST['custom_webhook_url'])) : '',
+                'notify_email'       => isset($_POST['notify_email']) ? sanitize_email(wp_unslash((string) $_POST['notify_email'])) : '',
+            ];
+
+            $settings->update($values);
+            $saved = true;
+        }
+
+        $slack  = $settings->get('slack_webhook_url');
+        $hook   = $settings->get('custom_webhook_url');
+        $email  = $settings->get('notify_email');
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Advanced Form Engine Settings', 'advanced-form-engine'); ?></h1>
-            <p><?php esc_html_e('Here you will configure Slack, Mailgun, SendGrid, and Webhook integrations.', 'advanced-form-engine'); ?></p>
+
+            <?php if ($saved) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php esc_html_e('Settings saved.', 'advanced-form-engine'); ?></p></div>
+            <?php endif; ?>
+
+            <form method="post">
+                <?php wp_nonce_field('afe_save_settings', 'afe_settings_nonce'); ?>
+
+                <table class="form-table" role="presentation">
+                    <tbody>
+                    <tr>
+                        <th scope="row"><label for="slack_webhook_url"><?php esc_html_e('Slack Incoming Webhook URL', 'advanced-form-engine'); ?></label></th>
+                        <td>
+                            <input type="url" class="regular-text" id="slack_webhook_url" name="slack_webhook_url" value="<?php echo esc_attr($slack); ?>" />
+                            <p class="description"><?php esc_html_e('If set, a Slack message will be sent on each submission.', 'advanced-form-engine'); ?></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><label for="custom_webhook_url"><?php esc_html_e('Custom Webhook URL', 'advanced-form-engine'); ?></label></th>
+                        <td>
+                            <input type="url" class="regular-text" id="custom_webhook_url" name="custom_webhook_url" value="<?php echo esc_attr($hook); ?>" />
+                            <p class="description"><?php esc_html_e('If set, a JSON POST will be sent on each submission.', 'advanced-form-engine'); ?></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><label for="notify_email"><?php esc_html_e('Notification Email', 'advanced-form-engine'); ?></label></th>
+                        <td>
+                            <input type="email" class="regular-text" id="notify_email" name="notify_email" value="<?php echo esc_attr($email); ?>" />
+                            <p class="description"><?php esc_html_e('If set, an email will be sent on each submission.', 'advanced-form-engine'); ?></p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <?php submit_button(__('Save Settings', 'advanced-form-engine')); ?>
+            </form>
         </div>
         <?php
     }
+
+
+
 }
