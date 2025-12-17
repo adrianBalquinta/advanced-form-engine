@@ -15,17 +15,18 @@
 - The plugin is organized into clear, responsibility-driven layers:
 
 
+```text
 src/
 ├── Admin/          → WordPress admin UI (forms list, editor, settings)
 ├── Frontend/       → Shortcodes, rendering, submission handling
 ├── Forms/          → Form entities and repositories
-├── Submissions/    → Submission persistence (custom DB table)
-├── Notifications/  → Integration strategies (Slack, Email, Webhooks)
+├── Submissions/    → Submission persistence
+├── Notifications/  → Slack, Email, Webhook strategies
 ├── Events/         → Domain events
 ├── Core/           → Plugin bootstrap, service container, event dispatcher
 └── Settings/       → Plugin configuration storage
+```
 
---- 
 
 - Each layer has a single responsibility and communicates with others through interfaces and events, not direct dependencies.
 
