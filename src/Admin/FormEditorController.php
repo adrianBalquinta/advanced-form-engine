@@ -5,6 +5,7 @@ namespace AFE\Admin;
 
 use AFE\Forms\FormRepository;
 use AFE\Forms\FormEntity;
+use AFE\Forms\FormConfig;
 
 class FormEditorController
 {
@@ -35,6 +36,9 @@ class FormEditorController
             }
         } else {
             $form = new FormEntity();
+
+            // New forms start with a valid, versioned config schema
+            $form->configJson = FormConfig::defaultJson();
         }
 
         // Handle POST (save)

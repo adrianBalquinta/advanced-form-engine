@@ -8,6 +8,9 @@ use AFE\Forms\FormEntity;
 use AFE\Submissions\SubmissionRepository;
 use AFE\Core\EventDispatcher;
 use AFE\Events\SubmissionCreatedEvent;
+use AFE\Forms\FormConfig;
+use AFE\Forms\FieldDefinition;
+
 
 class Renderer
 {
@@ -199,43 +202,37 @@ class Renderer
         return $result;
     }
 
-
     /**
-     * First return a simple default config.
-     * Later decode $configJson and build dynamic fields.
-     *
-     * @param string $configJson
      * @return array<int,array<string,mixed>>
      */
     private function getFieldsFromConfig(string $configJson): array
     {
-        $config = json_decode($configJson, true);
+        $config = FormConfig::fromJson($configJson);
 
-        if (is_array($config) && isset($config['fields']) && is_array($config['fields'])) {
-            // Very basic validation; Improve this when the editor is built .
-            return $config['fields'];
+        $fields = [];
+        foreach ($config->fields as $f) {
+            $fields[] = [
+                'name' => $f->id,         // keep your existing renderer expectations
+                'label' => $f->label,
+                'type' => $this->mapType($f->type),
+                'required' => $f->required,
+                'sensitive' => $f->sensitive,
+                'options' => $f->options,
+            ];
         }
 
-        // Default "MVP" fields
-        return [
-            [
-                'name' => 'name',
-                'label' => __('Name', 'advanced-form-engine'),
-                'type' => 'text',
-                'required' => true,
-            ],
-            [
-                'name' => 'email',
-                'label' => __('Email', 'advanced-form-engine'),
-                'type' => 'email',
-                'required' => true,
-            ],
-            [
-                'name' => 'message',
-                'label' => __('Message', 'advanced-form-engine'),
-                'type' => 'textarea',
-                'required' => false,
-            ],
-        ];
+        return $fields;
     }
+
+    private function mapType(string $type): string
+    {
+        // map schema types → HTML input types you currently support
+        return match ($type) {
+            'textarea' => 'textarea',
+            'email' => 'email',
+            'number' => 'number',
+            default => 'text',
+        };
+    }
+
 }

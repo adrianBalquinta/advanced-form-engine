@@ -22,10 +22,7 @@ class FormRepository
     {
         global $wpdb;
 
-        $rows = $wpdb->get_results(
-            "SELECT * FROM {$this->table} ORDER BY created_at DESC",
-            ARRAY_A
-        );
+        $rows = $wpdb->get_results("SELECT * FROM {$this->table} ORDER BY created_at DESC",ARRAY_A);
 
         if (!$rows) {
             return [];
@@ -46,10 +43,7 @@ class FormRepository
     {
         global $wpdb;
 
-        $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id),
-            ARRAY_A
-        );
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id),ARRAY_A);
 
         if (!$row) {
             return null;

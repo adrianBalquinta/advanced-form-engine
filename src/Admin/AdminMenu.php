@@ -5,6 +5,9 @@ namespace AFE\Admin;
 
 use AFE\Admin\FormListTable;
 use AFE\Admin\FormEditorController;
+use AFE\Admin\SubmissionListTable;
+use AFE\Admin\SubmissionViewController;
+
 
 class AdminMenu {
     public function register(): void {
@@ -26,6 +29,16 @@ class AdminMenu {
             'afe_settings',
             [$this, 'renderSettingsPage']
         );
+
+        add_submenu_page(
+            'afe_forms',
+            __('Submissions', 'advanced-form-engine'),
+            __('Submissions', 'advanced-form-engine'),
+            'manage_options',
+            'afe_submissions',
+            [$this, 'renderSubmissionsPage']
+        );
+
     }
 
     public function renderFormsPage(): void
@@ -147,6 +160,61 @@ class AdminMenu {
                 </table>
 
                 <?php submit_button(__('Save Settings', 'advanced-form-engine')); ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    public function renderSubmissionsPage(): void
+    {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have permission to access this page.', 'advanced-form-engine'));
+        }
+
+        $action = isset($_GET['action']) ? sanitize_key((string) $_GET['action']) : '';
+        $submissionId = isset($_GET['submission']) ? (int) $_GET['submission'] : 0;
+
+        // View screen
+        if ($action === 'view' && $submissionId > 0) {
+            $controller = new SubmissionViewController();
+            $controller->render($submissionId);
+            return;
+        }
+
+        // Export CSV (uses current filters/search)
+        if ($action === 'export') {
+            $controller = new \AFE\Admin\SubmissionExportController();
+            $controller->exportCsv();
+            return;
+        }
+
+        $table = new SubmissionListTable();
+        $table->prepare_items();
+
+        $exportUrl = add_query_arg(
+            [
+                'page'   => 'afe_submissions',
+                'action' => 'export',
+                // preserve filters
+                'form'   => isset($_GET['form']) ? (int) $_GET['form'] : 0,
+                's'      => isset($_GET['s']) ? sanitize_text_field((string) $_GET['s']) : '',
+            ],
+            admin_url('admin.php')
+        );
+        ?>
+        <div class="wrap">
+            <h1 class="wp-heading-inline"><?php esc_html_e('Submissions', 'advanced-form-engine'); ?></h1>
+
+            <a href="<?php echo esc_url($exportUrl); ?>" class="page-title-action">
+                <?php esc_html_e('Export CSV', 'advanced-form-engine'); ?>
+            </a>
+
+            <hr class="wp-header-end" />
+
+            <form method="get">
+                <input type="hidden" name="page" value="afe_submissions" />
+                <?php $table->search_box(__('Search', 'advanced-form-engine'), 'afe-submissions-search'); ?>
+                <?php $table->display(); ?>
             </form>
         </div>
         <?php
