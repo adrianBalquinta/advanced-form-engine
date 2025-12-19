@@ -226,7 +226,7 @@ class Renderer
 
     private function mapType(string $type): string
     {
-        // map schema types → HTML input types you currently support
+        // map schema types → HTML input types currently supported
         return match ($type) {
             'textarea' => 'textarea',
             'email' => 'email',
